@@ -20,7 +20,7 @@ from pandas_profiling import ProfileReport
 
 ## Disable Warning
 st.set_option('deprecation.showfileUploaderEncoding', False)
-st.set_option('deprecation.showPyplotGlobalUse', False)
+#st.set_option('deprecation.showPyplotGlobalUse', False)
 #%%
 
 data_flag = 0
