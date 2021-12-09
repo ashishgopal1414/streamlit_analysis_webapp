@@ -1,0 +1,11 @@
+seaborn==0.10.1
+pandas_profiling==2.8.0
+streamlit==0.65.0
+pandas==1.1.0
+numpy==1.19.1
+matplotlib==3.3.0
+plotly==4.9.0
+missingno==0.4.2
+streamlit_pandas_profiling==0.0.4
+Markdown==3.2.2
+scikit_learn==0.23.2
