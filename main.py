@@ -20,7 +20,7 @@ from pandas_profiling import ProfileReport
 
 ## Disable Warning
 st.set_option('deprecation.showfileUploaderEncoding', False)
-#st.set_option('deprecation.showPyplotGlobalUse', False)
+# st.set_option('deprecation.showPyplotGlobalUse', False)
 #%%
 
 data_flag = 0
@@ -193,9 +193,13 @@ def analysis_data(df):
                     ## Chi Sq. Test
                     ## if shape of crosstab >0 only then running the chi sq. test
                     df_crosstab = pd.crosstab(index=df_cluster[col_X], columns=df_cluster[col_y])
+                    # st.write(df_crosstab)
+                    if len(df_crosstab.columns)==1:
+                        df_crosstab['EmpExit1'] = np.nan
+
                     df_crosstab.columns = ['EmpExit0', 'EmpExit1']
                     df_crosstab['Exit Ratio %'] = np.divide(df_crosstab['EmpExit1'],
-                                                            (df_crosstab['EmpExit1'] + df_crosstab['EmpExit0'])) * 100
+                                                        (df_crosstab['EmpExit1'] + df_crosstab['EmpExit0'])) * 100
                     df_crosstab.sort_values(by='EmpExit1', ascending=False, inplace=True)
 
                     # savepath = os.path.join(dirpath, clus)
