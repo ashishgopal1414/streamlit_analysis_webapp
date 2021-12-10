@@ -17,6 +17,8 @@ matplotlib.use("Agg")
 import seaborn as sns
 import missingno as msno
 from pandas_profiling import ProfileReport
+import io, os, shutil, re, time, pickle, pathlib, glob, base64, xlsxwriter
+from io import BytesIO
 
 ## Disable Warning
 st.set_option('deprecation.showfileUploaderEncoding', False)
@@ -101,6 +103,22 @@ def preprocess_data(data_df):
     st.write('---------------------------------------------------')
 
 ################################################################################
+def to_excel(df):
+    output = BytesIO()
+    writer = pd.ExcelWriter(output, engine='xlsxwriter')
+    df.to_excel(writer, index = True, sheet_name='Sheet1',float_format="%.2f")
+    writer.save()
+    processed_data = output.getvalue()
+    return processed_data
+
+def get_table_download_link(df):
+    """Generates a link allowing the data in a given panda dataframe to be downloaded
+    in:  dataframe
+    out: href string
+    """
+    val = to_excel(df)
+    b64 = base64.b64encode(val)  # val looks like b'...'
+    return f'<a href="data:application/octet-stream;base64,{b64.decode()}" download="Results.xlsx">Download Excel file</a>' # decode b'abc' => abc
 
 def analysis_data(df):
     if not df.empty:
@@ -288,6 +306,8 @@ def analysis_data(df):
                                            feature_col=select_dimension,
                                            target_col=select_target)
                 st.write(results_df)
+                st.markdown(str('<button type="button">' + get_table_download_link(results_df) + '</button>'),
+                            unsafe_allow_html=True)
                 ################################################################################
                 select_dimension_val = st.multiselect('Select Dimension Value',
                                                     [None] + list(set(list(df_filter[select_dimension]))))
@@ -306,6 +326,8 @@ def analysis_data(df):
                                                      feature_col=select_dimension2,
                                                      target_col=select_target)
                         st.write(results_df2)
+                        st.markdown(str('<button type="button">' + get_table_download_link(results_df2) + '</button>'),
+                                    unsafe_allow_html=True)
                         ################################################################################
                         select_dimension_val2 = st.multiselect('Select Dimension2 Value',
                                                              [None] + list(set(list(df_filter2[select_dimension2]))))
@@ -324,6 +346,9 @@ def analysis_data(df):
                                                              feature_col=select_dimension3,
                                                              target_col=select_target)
                                 st.write(results_df3)
+                                st.markdown(
+                                    str('<button type="button">' + get_table_download_link(results_df3) + '</button>'),
+                                    unsafe_allow_html=True)
                                 ################################################################################
                                 select_dimension_val3 = st.multiselect('Select Dimension3 Value',
                                                                      [None] + list(
@@ -343,6 +368,9 @@ def analysis_data(df):
                                                                      feature_col=select_dimension4,
                                                                      target_col=select_target)
                                         st.write(results_df4)
+                                        st.markdown(str('<button type="button">' + get_table_download_link(
+                                            results_df4) + '</button>'),
+                                                    unsafe_allow_html=True)
                                         ################################################################################
                                         select_dimension_val4 = st.multiselect('Select Dimension4 Value',
                                                                              [None] + list(
@@ -362,6 +390,9 @@ def analysis_data(df):
                                                                              feature_col=select_dimension5,
                                                                              target_col=select_target)
                                                 st.write(results_df5)
+                                                st.markdown(str('<button type="button">' + get_table_download_link(
+                                                    results_df5) + '</button>'),
+                                                            unsafe_allow_html=True)
                                                 ################################################################################
                                                 select_dimension_val5 = st.multiselect('Select Dimension5 Value',
                                                                                        [None] + list(
