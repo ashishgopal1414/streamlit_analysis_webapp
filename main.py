@@ -241,9 +241,9 @@ def analysis_data(df):
             plt.xticks(rotation=45)
             plt.ylim(top=1)
 
-            # Visible x - axis line
-            for spine in plt.gca().spines.values():
-                spine.set_visible(False) if spine.spine_type != 'bottom' else spine.set_visible(True)
+            # # Visible x - axis line
+            # for spine in plt.gca().spines.values():
+            #     spine.set_visible(False) if spine.spine_type != 'bottom' else spine.set_visible(True)
 
             # Display label for each plot
             for i, v in (enumerate(y)):
@@ -254,7 +254,7 @@ def analysis_data(df):
                         , ha='center')
 
             # plt.show()
-            st.pyplot()
+            st.pyplot(fig)
         ########################################################################################################
         cluster_col      = 'Cluster'
         cluster_exit_col = 'Cluster__EmployeeExit'
