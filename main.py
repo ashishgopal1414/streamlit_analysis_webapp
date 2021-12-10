@@ -236,12 +236,12 @@ def analysis_data(df):
                                            target_col=select_target)
                 st.write(results_df)
                 ################################################################################
-                select_dimension_val = st.selectbox('Select Dimension Value',
+                select_dimension_val = st.multiselect('Select Dimension Value',
                                                     [None] + list(set(list(df_filter[select_dimension]))))
 
-                if ((select_dimension_val is not None)):
+                if ((None not in select_dimension_val) and len(select_dimension_val)>0):
                     # st.write(f'{select_dimension} vs {select_target}')
-                    df_filter2 = df_filter[df_filter[select_dimension] == select_dimension_val]
+                    df_filter2 = df_filter[df_filter[select_dimension].isin(select_dimension_val)]
                     st.write(
                         '##################################################################################################')
                     select_dimension2 = st.selectbox('Select Dimension2', df_filter2.columns)
@@ -254,12 +254,12 @@ def analysis_data(df):
                                                      target_col=select_target)
                         st.write(results_df2)
                         ################################################################################
-                        select_dimension_val2 = st.selectbox('Select Dimension2 Value',
+                        select_dimension_val2 = st.multiselect('Select Dimension2 Value',
                                                              [None] + list(set(list(df_filter2[select_dimension2]))))
 
-                        if ((select_dimension_val2 is not None)):
+                        if ((None not in select_dimension_val2) and len(select_dimension_val2)>0):
                             # st.write(f'{select_dimension} vs {select_target}')
-                            df_filter3 = df_filter2[df_filter2[select_dimension2] == select_dimension_val2]
+                            df_filter3 = df_filter2[df_filter2[select_dimension2].isin(select_dimension_val2)]
                             st.write(
                                 '##################################################################################################')
                             select_dimension3 = st.selectbox('Select Dimension3', df_filter3.columns)
@@ -272,13 +272,13 @@ def analysis_data(df):
                                                              target_col=select_target)
                                 st.write(results_df3)
                                 ################################################################################
-                                select_dimension_val3 = st.selectbox('Select Dimension3 Value',
+                                select_dimension_val3 = st.multiselect('Select Dimension3 Value',
                                                                      [None] + list(
                                                                          set(list(df_filter3[select_dimension3]))))
 
-                                if ((select_dimension_val3 is not None)):
+                                if ((None not in select_dimension_val3) and len(select_dimension_val3)>0):
                                     # st.write(f'{select_dimension} vs {select_target}')
-                                    df_filter4 = df_filter3[df_filter3[select_dimension3] == select_dimension_val3]
+                                    df_filter4 = df_filter3[df_filter3[select_dimension3].isin(select_dimension_val3)]
                                     st.write(
                                         '##################################################################################################')
                                     select_dimension4 = st.selectbox('Select Dimension4', df_filter4.columns)
@@ -291,13 +291,13 @@ def analysis_data(df):
                                                                      target_col=select_target)
                                         st.write(results_df4)
                                         ################################################################################
-                                        select_dimension_val4 = st.selectbox('Select Dimension4 Value',
+                                        select_dimension_val4 = st.multiselect('Select Dimension4 Value',
                                                                              [None] + list(
                                                                                  set(list(df_filter4[select_dimension4]))))
 
-                                        if ((select_dimension_val4 is not None)):
+                                        if ((None not in select_dimension_val4) and len(select_dimension_val4)>0):
                                             # st.write(f'{select_dimension} vs {select_target}')
-                                            df_filter5 = df_filter4[df_filter4[select_dimension4] == select_dimension_val4]
+                                            df_filter5 = df_filter4[df_filter4[select_dimension4].isin(select_dimension_val4)]
                                             st.write(
                                                 '##################################################################################################')
                                             select_dimension5 = st.selectbox('Select Dimension5', df_filter5.columns)
