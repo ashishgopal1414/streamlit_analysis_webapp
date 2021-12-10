@@ -263,7 +263,7 @@ def analysis_data(df):
         # select_target = st.selectbox('Select Target Column', df.columns)
         select_target = target_col
 
-        Churn_rate = (df[cluster_exit_col].value_counts())/ df.shape[0]
+        Churn_rate = df[cluster_exit_col].value_counts() / df.shape[0]
 
         Generate_bar_graph2(Churn_rate.index
                             , Churn_rate.values
@@ -363,6 +363,31 @@ def analysis_data(df):
                                                                              target_col=select_target)
                                                 st.write(results_df5)
                                                 ################################################################################
+                                                select_dimension_val5 = st.multiselect('Select Dimension5 Value',
+                                                                                       [None] + list(
+                                                                                           set(list(df_filter5[
+                                                                                                        select_dimension5]))))
+
+                                                if ((None not in select_dimension_val5) and len(
+                                                        select_dimension_val5) > 0):
+                                                    # st.write(f'{select_dimension} vs {select_target}')
+                                                    df_filter6 = df_filter5[
+                                                        df_filter5[select_dimension5].isin(select_dimension_val5)]
+                                                    st.write(
+                                                        '##################################################################################################')
+                                                    select_dimension6 = st.selectbox('Select Dimension6',
+                                                                                     df_filter6.columns)
+
+                                                    if ((select_dimension6 is not None)):
+                                                        st.write(f'{select_dimension6} vs {select_target}')
+
+                                                        results_df6 = data_grouping2(data_df=df_filter6,
+                                                                                     feature_col=select_dimension6,
+                                                                                     target_col=select_target)
+                                                        st.write(results_df6)
+                                                
+                                                
+                                                
     else:
         st.markdown('**No Data Available to show!**.')
 
