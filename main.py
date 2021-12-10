@@ -263,7 +263,7 @@ def analysis_data(df):
         # select_target = st.selectbox('Select Target Column', df.columns)
         select_target = target_col
 
-        Churn_rate = (df[cluster_exit_col].value_counts() * 100)/ df.shape[0]
+        Churn_rate = (df[cluster_exit_col].value_counts())/ df.shape[0]
 
         Generate_bar_graph2(Churn_rate.index
                             , Churn_rate.values
