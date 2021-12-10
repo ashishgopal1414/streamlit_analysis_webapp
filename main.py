@@ -217,9 +217,62 @@ def analysis_data(df):
                 #     df_crosstab_overall.to_csv(os.path.join(dirpath,fname_overall))
                 return df_crosstab_overall
         ########################################################################################################
-        cluster_col = 'Cluster'
+        plotColor = ['b', 'g', 'r', 'm', 'c', 'y']
+        markers = ['+', 'o', '*', '^', 'v', '>', '<']
+
+        # set up
+        sns.set(style='whitegrid')
+        def Generate_bar_graph2(x, y, x_title, y_title, chart_title, color=plotColor):
+            """ Based on x and y value, generate bar graph """
+
+            fig, ax = plt.subplots(figsize=(15, 8))
+            ax.bar(range(len(x))
+                   , y
+                   , color=color
+                   , alpha=0.6)
+
+            # stopping alphabetical sorting of graph
+            plt.xticks(range(len(x)), x)
+            plt.title(chart_title, fontsize=14)
+            plt.xlabel(x_title, fontsize=13)
+            plt.ylabel(y_title, fontsize=13)
+            plt.grid(b=False)
+            plt.yticks(fontsize=0)
+            plt.xticks(rotation=45)
+            plt.ylim(top=1)
+
+            # Visible x - axis line
+            for spine in plt.gca().spines.values():
+                spine.set_visible(False) if spine.spine_type != 'bottom' else spine.set_visible(True)
+
+            # Display label for each plot
+            for i, v in (enumerate(y)):
+                ax.text(i
+                        , v + 0.05
+                        , str(round((v * 100), 2)) + '%'
+                        , fontsize=13
+                        , ha='center')
+
+            # plt.show()
+            st.pyplot()
+        ########################################################################################################
+        cluster_col      = 'Cluster'
+        cluster_exit_col = 'Cluster__EmployeeExit'
+        target_col       = 'Employee Exit'
+
         # select_target = st.selectbox('Select Target Column', df.columns)
-        select_target = 'Employee Exit'
+        select_target = target_col
+
+        Churn_rate = df[cluster_exit_col].value_counts() / df.shape[0]
+
+        Generate_bar_graph2(Churn_rate.index
+                            , Churn_rate.values
+                            , 'Employees'
+                            , 'Percentage'
+                            , 'Employee Distribution')
+        # plt.show()
+        st.write(Churn_rate)
+
         selected_clusters = st.multiselect('Available Clusters', (list(df[cluster_col].unique())))
         if len(selected_clusters)>0:
             st.markdown(list(selected_clusters))
