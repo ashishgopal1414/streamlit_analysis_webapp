@@ -211,11 +211,23 @@ def analysis_data(df):
                     ## Chi Sq. Test
                     ## if shape of crosstab >0 only then running the chi sq. test
                     df_crosstab = pd.crosstab(index=df_cluster[col_X], columns=df_cluster[col_y])
+                    # df_crosstab = pd.DataFrame(df_crosstab)
                     # st.write(df_crosstab)
-                    if len(df_crosstab.columns)==1:
-                        df_crosstab['EmpExit1'] = np.nan
+                    for col in list(df_crosstab.columns):
+                        if len(df_crosstab.columns)==1:
+                            if col == 1:
+                                df_crosstab['EmpExit0'] = np.nan
+                                df_crosstab['EmpExit1'] = df_crosstab.iloc[:,0]
+                                df_crosstab.drop(columns=col, inplace=True)
+                            elif col == 0:
+                                df_crosstab['EmpExit0'] = df_crosstab.iloc[:,0]
+                                df_crosstab['EmpExit1'] = np.nan
+                                df_crosstab.drop(columns=col, inplace=True)
+                        elif len(df_crosstab.columns)==2:
+                            df_crosstab.columns = ['EmpExit0', 'EmpExit1']
 
-                    df_crosstab.columns = ['EmpExit0', 'EmpExit1']
+                    # st.write(df_crosstab)
+                    # df_crosstab.columns = ['EmpExit0', 'EmpExit1']
                     df_crosstab['Exit Ratio %'] = np.divide(df_crosstab['EmpExit1'],
                                                         (df_crosstab['EmpExit1'] + df_crosstab['EmpExit0'])) * 100
                     df_crosstab.sort_values(by='EmpExit1', ascending=False, inplace=True)
@@ -321,7 +333,7 @@ def analysis_data(df):
 
                     if ((select_dimension2 is not None)):
                         st.write(f'{select_dimension2} vs {select_target}')
-
+                        # st.write(df_filter2)
                         results_df2 = data_grouping2(data_df=df_filter2,
                                                      feature_col=select_dimension2,
                                                      target_col=select_target)
