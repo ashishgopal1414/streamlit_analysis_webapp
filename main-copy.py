@@ -189,16 +189,16 @@ def analysis_data(df):
                 print(f'{col_X} vs {col_y}')
 
                 df_crosstab_overall = pd.DataFrame()
-                df_crosstab_overall = pd.crosstab(index=data_df[col_X], columns=data_df[col_y])
-                df_crosstab_overall.columns = ['EmpExit0', 'EmpExit1']
-                df_crosstab_overall['Exit Ratio %'] = np.divide(df_crosstab_overall['EmpExit1'],
-                                                                (df_crosstab_overall['EmpExit1'] + df_crosstab_overall[
-                                                                    'EmpExit0'])) * 100
-
-                df_crosstab_overall.sort_values(by='EmpExit1', ascending=False, inplace=True)
-
-                overall_cols = ['FilteredOverall_EmpExit0', 'FilteredOverall_EmpExit1', 'FilteredOverall_ExitRatio%']
-                # overall_cols = []
+                # df_crosstab_overall = pd.crosstab(index=data_df[col_X], columns=data_df[col_y])
+                # df_crosstab_overall.columns = ['EmpExit0', 'EmpExit1']
+                # df_crosstab_overall['Exit Ratio %'] = np.divide(df_crosstab_overall['EmpExit1'],
+                #                                                 (df_crosstab_overall['EmpExit1'] + df_crosstab_overall[
+                #                                                     'EmpExit0'])) * 100
+                #
+                # df_crosstab_overall.sort_values(by='EmpExit1', ascending=False, inplace=True)
+                #
+                # overall_cols = ['Overall_EmpExit0', 'Overall_EmpExit1', 'Overall_ExitRatio%']
+                overall_cols = []
 
                 ## Filtering Dataset
                 for clus in list(data_df['Cluster'].unique()):
