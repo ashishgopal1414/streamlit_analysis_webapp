@@ -303,6 +303,22 @@ def analysis_data(df):
             # plt.show()
             st.pyplot(fig)
         ########################################################################################################
+        cluster_col = 'Cluster'
+        target_col = 'Employee Exit'
+
+        # select_target = st.selectbox('Select Target Column', df.columns)
+        select_target = target_col
+
+        Churn_rate = df[target_col].value_counts() / df.shape[0]
+
+        Generate_bar_graph2(Churn_rate.index
+                            , Churn_rate.values
+                            , 'Employees'
+                            , 'Percentage'
+                            , 'Employee Distribution')
+        # plt.show()
+        st.write(Churn_rate)
+        ##############################################################################################
         cluster_col      = 'Cluster'
         cluster_exit_col = 'Cluster__EmployeeExit'
         target_col       = 'Employee Exit'
@@ -319,6 +335,7 @@ def analysis_data(df):
                             , 'Employee Distribution')
         # plt.show()
         st.write(Churn_rate)
+        ##############################################################################################
 
         selected_clusters = st.multiselect('Available Clusters', (list(df[cluster_col].unique())))
         if len(selected_clusters)>0:
