@@ -183,14 +183,31 @@ def analysis_data(df):
             data_df = data_df.copy()
             cols_x = [feature_col]
             col_y = target_col
+            # st.write(data_df)
+            # st.write(data_df.shape)
 
             for col_X in cols_x:
                 print('##################################################################################################')
                 print(f'{col_X} vs {col_y}')
 
-                df_crosstab_overall = pd.DataFrame()
+                # df_crosstab_overall = pd.DataFrame()
                 df_crosstab_overall = pd.crosstab(index=data_df[col_X], columns=data_df[col_y])
-                df_crosstab_overall.columns = ['EmpExit0', 'EmpExit1']
+                # st.write(df_crosstab_overall)
+                # st.write(df_crosstab_overall.shape)
+                for col in list(df_crosstab_overall.columns):
+                    if len(df_crosstab_overall.columns) == 1:
+                        if col == 1:
+                            df_crosstab_overall['EmpExit0'] = np.nan
+                            df_crosstab_overall['EmpExit1'] = df_crosstab_overall.iloc[:, 0]
+                            df_crosstab_overall.drop(columns=col, inplace=True)
+                        elif col == 0:
+                            df_crosstab_overall['EmpExit0'] = df_crosstab_overall.iloc[:, 0]
+                            df_crosstab_overall['EmpExit1'] = np.nan
+                            df_crosstab_overall.drop(columns=col, inplace=True)
+                    elif len(df_crosstab_overall.columns) == 2:
+                        df_crosstab_overall.columns = ['EmpExit0', 'EmpExit1']
+
+                # df_crosstab_overall.columns = ['EmpExit0', 'EmpExit1']
                 df_crosstab_overall['Exit Ratio %'] = np.divide(df_crosstab_overall['EmpExit1'],
                                                                 (df_crosstab_overall['EmpExit1'] + df_crosstab_overall[
                                                                     'EmpExit0'])) * 100
