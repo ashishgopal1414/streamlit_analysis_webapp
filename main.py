@@ -343,7 +343,7 @@ def analysis_data(df):
             df_filter = df[df[cluster_col].isin(selected_clusters)]
             st.write(df_filter.shape)
             st.write('##################################################################################################')
-            select_dimension = st.selectbox('Select Dimension', ([None] + list(df_filter.columns)))
+            select_dimension = st.selectbox('Select Dimension', (list(df_filter.columns)))
 
             if ((select_dimension is not None) & (select_target is not None)):
                 st.write(f'{select_dimension} vs {select_target}')
@@ -356,7 +356,7 @@ def analysis_data(df):
                             unsafe_allow_html=True)
                 ################################################################################
                 select_dimension_val = st.multiselect('Select Dimension Value',
-                                                    [None] + list(set(list(df_filter[select_dimension]))))
+                                                    list(set(list(df_filter[select_dimension]))))
 
                 if ((None not in select_dimension_val) and len(select_dimension_val)>0):
                     # st.write(f'{select_dimension} vs {select_target}')
@@ -376,7 +376,7 @@ def analysis_data(df):
                                     unsafe_allow_html=True)
                         ################################################################################
                         select_dimension_val2 = st.multiselect('Select Dimension2 Value',
-                                                             [None] + list(set(list(df_filter2[select_dimension2]))))
+                                                             list(set(list(df_filter2[select_dimension2]))))
 
                         if ((None not in select_dimension_val2) and len(select_dimension_val2)>0):
                             # st.write(f'{select_dimension} vs {select_target}')
@@ -397,7 +397,7 @@ def analysis_data(df):
                                     unsafe_allow_html=True)
                                 ################################################################################
                                 select_dimension_val3 = st.multiselect('Select Dimension3 Value',
-                                                                     [None] + list(
+                                                                     list(
                                                                          set(list(df_filter3[select_dimension3]))))
 
                                 if ((None not in select_dimension_val3) and len(select_dimension_val3)>0):
@@ -419,7 +419,7 @@ def analysis_data(df):
                                                     unsafe_allow_html=True)
                                         ################################################################################
                                         select_dimension_val4 = st.multiselect('Select Dimension4 Value',
-                                                                             [None] + list(
+                                                                             list(
                                                                                  set(list(df_filter4[select_dimension4]))))
 
                                         if ((None not in select_dimension_val4) and len(select_dimension_val4)>0):
@@ -441,7 +441,7 @@ def analysis_data(df):
                                                             unsafe_allow_html=True)
                                                 ################################################################################
                                                 select_dimension_val5 = st.multiselect('Select Dimension5 Value',
-                                                                                       [None] + list(
+                                                                                       list(
                                                                                            set(list(df_filter5[
                                                                                                         select_dimension5]))))
 
