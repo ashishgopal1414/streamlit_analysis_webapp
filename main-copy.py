@@ -13,6 +13,7 @@ import numpy as numpy
 # Data Viz Packages
 import matplotlib.pyplot as plt
 import matplotlib
+
 matplotlib.use("Agg")
 import seaborn as sns
 import missingno as msno
@@ -23,25 +24,26 @@ from io import BytesIO
 ## Disable Warning
 st.set_option('deprecation.showfileUploaderEncoding', False)
 # st.set_option('deprecation.showPyplotGlobalUse', False)
-#%%
+# %%
 
 data_flag = 0
 
-#%%
+# %%
 current_path = os.getcwd()
 
 ## Create sub directories if not created: "Raw Data" , "Batch Wise Data" , "Aggregated Data"
-folder_names = [name for name in ["Raw Data" , "Modified Data"]]
+folder_names = [name for name in ["Raw Data", "Modified Data"]]
 
 for folder_name in folder_names:
     if not os.path.exists(folder_name):
         os.makedirs(folder_name)
-#%%
+# %%
 
 datafile_path = os.path.join(current_path, "Raw Data", "data.csv")
 modifiedfile_path = os.path.join(current_path, "Modified Data", "data.csv")
 
 data_df = pd.DataFrame()
+
 
 ################################################################################
 # from typing import Dict
@@ -61,6 +63,7 @@ def load_data():
             st.write(data_df)
     return data_df
 
+
 ################################################################################
 
 def load_modified_data():
@@ -72,6 +75,8 @@ def load_modified_data():
         if st.checkbox("Click to view Modified data"):
             st.write(data_df)
     return data_df
+
+
 ################################################################################
 
 def preprocess_data(data_df):
@@ -102,14 +107,16 @@ def preprocess_data(data_df):
         st.markdown('**No Data Available to show!**.')
     st.write('---------------------------------------------------')
 
+
 ################################################################################
 def to_excel(df):
     output = BytesIO()
     writer = pd.ExcelWriter(output, engine='xlsxwriter')
-    df.to_excel(writer, index = True, sheet_name='Sheet1',float_format="%.2f")
+    df.to_excel(writer, index=True, sheet_name='Sheet1', float_format="%.2f")
     writer.save()
     processed_data = output.getvalue()
     return processed_data
+
 
 def get_table_download_link(df):
     """Generates a link allowing the data in a given panda dataframe to be downloaded
@@ -118,7 +125,8 @@ def get_table_download_link(df):
     """
     val = to_excel(df)
     b64 = base64.b64encode(val)  # val looks like b'...'
-    return f'<a href="data:application/octet-stream;base64,{b64.decode()}" download="Results.xlsx">Download Excel file</a>' # decode b'abc' => abc
+    return f'<a href="data:application/octet-stream;base64,{b64.decode()}" download="Results.xlsx">Download Excel file</a>'  # decode b'abc' => abc
+
 
 def analysis_data(df):
     if not df.empty:
@@ -183,22 +191,40 @@ def analysis_data(df):
             data_df = data_df.copy()
             cols_x = [feature_col]
             col_y = target_col
+            # st.write(data_df)
+            # st.write(data_df.shape)
 
             for col_X in cols_x:
-                print('##################################################################################################')
+                print(
+                    '##################################################################################################')
                 print(f'{col_X} vs {col_y}')
 
-                df_crosstab_overall = pd.DataFrame()
-                # df_crosstab_overall = pd.crosstab(index=data_df[col_X], columns=data_df[col_y])
+                # df_crosstab_overall = pd.DataFrame()
+                df_crosstab_overall = pd.crosstab(index=data_df[col_X], columns=data_df[col_y])
+                # st.write(df_crosstab_overall)
+                # st.write(df_crosstab_overall.shape)
+                for col in list(df_crosstab_overall.columns):
+                    if len(df_crosstab_overall.columns) == 1:
+                        if col == 1:
+                            df_crosstab_overall['EmpExit0'] = np.nan
+                            df_crosstab_overall['EmpExit1'] = df_crosstab_overall.iloc[:, 0]
+                            df_crosstab_overall.drop(columns=col, inplace=True)
+                        elif col == 0:
+                            df_crosstab_overall['EmpExit0'] = df_crosstab_overall.iloc[:, 0]
+                            df_crosstab_overall['EmpExit1'] = np.nan
+                            df_crosstab_overall.drop(columns=col, inplace=True)
+                    elif len(df_crosstab_overall.columns) == 2:
+                        df_crosstab_overall.columns = ['EmpExit0', 'EmpExit1']
+
                 # df_crosstab_overall.columns = ['EmpExit0', 'EmpExit1']
-                # df_crosstab_overall['Exit Ratio %'] = np.divide(df_crosstab_overall['EmpExit1'],
-                #                                                 (df_crosstab_overall['EmpExit1'] + df_crosstab_overall[
-                #                                                     'EmpExit0'])) * 100
-                #
-                # df_crosstab_overall.sort_values(by='EmpExit1', ascending=False, inplace=True)
-                #
-                # overall_cols = ['Overall_EmpExit0', 'Overall_EmpExit1', 'Overall_ExitRatio%']
-                overall_cols = []
+                df_crosstab_overall['Exit Ratio %'] = np.divide(df_crosstab_overall['EmpExit1'],
+                                                                (df_crosstab_overall['EmpExit1'] + df_crosstab_overall[
+                                                                    'EmpExit0'])) * 100
+
+                df_crosstab_overall.sort_values(by='EmpExit1', ascending=False, inplace=True)
+
+                overall_cols = ['FilteredOverall_EmpExit0', 'FilteredOverall_EmpExit1', 'FilteredOverall_ExitRatio%']
+                # overall_cols = []
 
                 ## Filtering Dataset
                 for clus in list(data_df['Cluster'].unique()):
@@ -214,22 +240,22 @@ def analysis_data(df):
                     # df_crosstab = pd.DataFrame(df_crosstab)
                     # st.write(df_crosstab)
                     for col in list(df_crosstab.columns):
-                        if len(df_crosstab.columns)==1:
+                        if len(df_crosstab.columns) == 1:
                             if col == 1:
                                 df_crosstab['EmpExit0'] = np.nan
-                                df_crosstab['EmpExit1'] = df_crosstab.iloc[:,0]
+                                df_crosstab['EmpExit1'] = df_crosstab.iloc[:, 0]
                                 df_crosstab.drop(columns=col, inplace=True)
                             elif col == 0:
-                                df_crosstab['EmpExit0'] = df_crosstab.iloc[:,0]
+                                df_crosstab['EmpExit0'] = df_crosstab.iloc[:, 0]
                                 df_crosstab['EmpExit1'] = np.nan
                                 df_crosstab.drop(columns=col, inplace=True)
-                        elif len(df_crosstab.columns)==2:
+                        elif len(df_crosstab.columns) == 2:
                             df_crosstab.columns = ['EmpExit0', 'EmpExit1']
 
                     # st.write(df_crosstab)
                     # df_crosstab.columns = ['EmpExit0', 'EmpExit1']
                     df_crosstab['Exit Ratio %'] = np.divide(df_crosstab['EmpExit1'],
-                                                        (df_crosstab['EmpExit1'] + df_crosstab['EmpExit0'])) * 100
+                                                            (df_crosstab['EmpExit1'] + df_crosstab['EmpExit0'])) * 100
                     df_crosstab.sort_values(by='EmpExit1', ascending=False, inplace=True)
 
                     # savepath = os.path.join(dirpath, clus)
@@ -246,12 +272,14 @@ def analysis_data(df):
                 # df_crosstab_overall.sort_values(by='Overall_EmpExit1', ascending=False, inplace=True)
                 #     df_crosstab_overall.to_csv(os.path.join(dirpath,fname_overall))
                 return df_crosstab_overall
+
         ########################################################################################################
         plotColor = ['b', 'g', 'r', 'm', 'c', 'y']
         markers = ['+', 'o', '*', '^', 'v', '>', '<']
 
         # set up
         sns.set(style='whitegrid')
+
         def Generate_bar_graph2(x, y, x_title, y_title, chart_title, color=plotColor):
             """ Based on x and y value, generate bar graph """
 
@@ -285,10 +313,27 @@ def analysis_data(df):
 
             # plt.show()
             st.pyplot(fig)
+
         ########################################################################################################
-        cluster_col      = 'Cluster'
+        cluster_col = 'Cluster'
+        target_col = 'Employee Exit'
+
+        # select_target = st.selectbox('Select Target Column', df.columns)
+        select_target = target_col
+
+        Churn_rate = df[target_col].value_counts() / df.shape[0]
+
+        Generate_bar_graph2(Churn_rate.index
+                            , Churn_rate.values
+                            , 'Employees'
+                            , 'Percentage'
+                            , 'Employee Distribution')
+        # plt.show()
+        st.write(Churn_rate)
+        ##############################################################################################
+        cluster_col = 'Cluster'
         cluster_exit_col = 'Cluster__EmployeeExit'
-        target_col       = 'Employee Exit'
+        target_col = 'Employee Exit'
 
         # select_target = st.selectbox('Select Target Column', df.columns)
         select_target = target_col
@@ -302,14 +347,16 @@ def analysis_data(df):
                             , 'Employee Distribution')
         # plt.show()
         st.write(Churn_rate)
+        ##############################################################################################
 
         selected_clusters = st.multiselect('Available Clusters', (list(df[cluster_col].unique())))
-        if len(selected_clusters)>0:
+        if len(selected_clusters) > 0:
             st.markdown(list(selected_clusters))
             df_filter = df[df[cluster_col].isin(selected_clusters)]
             st.write(df_filter.shape)
-            st.write('##################################################################################################')
-            select_dimension = st.selectbox('Select Dimension', ([None] + list(df_filter.columns)))
+            st.write(
+                '##################################################################################################')
+            select_dimension = st.selectbox('Select Dimension', (list(df_filter.columns)))
 
             if ((select_dimension is not None) & (select_target is not None)):
                 st.write(f'{select_dimension} vs {select_target}')
@@ -322,9 +369,9 @@ def analysis_data(df):
                             unsafe_allow_html=True)
                 ################################################################################
                 select_dimension_val = st.multiselect('Select Dimension Value',
-                                                    [None] + list(set(list(df_filter[select_dimension]))))
+                                                      list(set(list(df_filter[select_dimension]))))
 
-                if ((None not in select_dimension_val) and len(select_dimension_val)>0):
+                if ((None not in select_dimension_val) and len(select_dimension_val) > 0):
                     # st.write(f'{select_dimension} vs {select_target}')
                     df_filter2 = df_filter[df_filter[select_dimension].isin(select_dimension_val)]
                     st.write(
@@ -342,9 +389,9 @@ def analysis_data(df):
                                     unsafe_allow_html=True)
                         ################################################################################
                         select_dimension_val2 = st.multiselect('Select Dimension2 Value',
-                                                             [None] + list(set(list(df_filter2[select_dimension2]))))
+                                                               list(set(list(df_filter2[select_dimension2]))))
 
-                        if ((None not in select_dimension_val2) and len(select_dimension_val2)>0):
+                        if ((None not in select_dimension_val2) and len(select_dimension_val2) > 0):
                             # st.write(f'{select_dimension} vs {select_target}')
                             df_filter3 = df_filter2[df_filter2[select_dimension2].isin(select_dimension_val2)]
                             st.write(
@@ -363,10 +410,10 @@ def analysis_data(df):
                                     unsafe_allow_html=True)
                                 ################################################################################
                                 select_dimension_val3 = st.multiselect('Select Dimension3 Value',
-                                                                     [None] + list(
-                                                                         set(list(df_filter3[select_dimension3]))))
+                                                                       list(
+                                                                           set(list(df_filter3[select_dimension3]))))
 
-                                if ((None not in select_dimension_val3) and len(select_dimension_val3)>0):
+                                if ((None not in select_dimension_val3) and len(select_dimension_val3) > 0):
                                     # st.write(f'{select_dimension} vs {select_target}')
                                     df_filter4 = df_filter3[df_filter3[select_dimension3].isin(select_dimension_val3)]
                                     st.write(
@@ -385,12 +432,14 @@ def analysis_data(df):
                                                     unsafe_allow_html=True)
                                         ################################################################################
                                         select_dimension_val4 = st.multiselect('Select Dimension4 Value',
-                                                                             [None] + list(
-                                                                                 set(list(df_filter4[select_dimension4]))))
+                                                                               list(
+                                                                                   set(list(
+                                                                                       df_filter4[select_dimension4]))))
 
-                                        if ((None not in select_dimension_val4) and len(select_dimension_val4)>0):
+                                        if ((None not in select_dimension_val4) and len(select_dimension_val4) > 0):
                                             # st.write(f'{select_dimension} vs {select_target}')
-                                            df_filter5 = df_filter4[df_filter4[select_dimension4].isin(select_dimension_val4)]
+                                            df_filter5 = df_filter4[
+                                                df_filter4[select_dimension4].isin(select_dimension_val4)]
                                             st.write(
                                                 '##################################################################################################')
                                             select_dimension5 = st.selectbox('Select Dimension5', df_filter5.columns)
@@ -407,7 +456,7 @@ def analysis_data(df):
                                                             unsafe_allow_html=True)
                                                 ################################################################################
                                                 select_dimension_val5 = st.multiselect('Select Dimension5 Value',
-                                                                                       [None] + list(
+                                                                                       list(
                                                                                            set(list(df_filter5[
                                                                                                         select_dimension5]))))
 
@@ -428,17 +477,19 @@ def analysis_data(df):
                                                                                      feature_col=select_dimension6,
                                                                                      target_col=select_target)
                                                         st.write(results_df6)
-                                                
-                                                
-                                                
+
+
+
     else:
         st.markdown('**No Data Available to show!**.')
 
     st.write('---------------------------------------------------')
 
+
 ################################################################################
 # import SessionState
 import time
+
 
 def main():
     """ Semi Supervised Machine Learning App with Streamlit """
@@ -446,7 +497,7 @@ def main():
     # session = SessionState.get(run_id=0)
 
     st.title("Data Science Webapp")
-    #st.text("By Ashish Gopal")
+    # st.text("By Ashish Gopal")
 
     activities_outer = ["Data Ingestion", "Others", "About"]
     choice_1_outer = st.sidebar.radio("Choose your Step:", activities_outer)
@@ -454,7 +505,7 @@ def main():
     data = pd.DataFrame()
 
     if choice_1_outer == "Data Ingestion":
-        file_types = ["csv","txt"]
+        file_types = ["csv", "txt"]
 
         activities_1 = ["1. Data Import", "2. Data Preprocess", "3. Data Analysis"]
         choice_1 = st.sidebar.selectbox("Select Activities", activities_1)
@@ -463,7 +514,7 @@ def main():
             data = None
             show_file = st.empty()
             if st.checkbox("Click to Upload data"):
-                data = st.file_uploader("Upload Dataset : ",type=file_types)
+                data = st.file_uploader("Upload Dataset : ", type=file_types)
             if not data:
                 show_file.info("Please upload a file of type: " + ", ".join(file_types))
                 if os.path.exists(datafile_path):
@@ -500,7 +551,6 @@ def main():
         if choice_1 == "3. Data Analysis":
             analysis_data(load_modified_data())
 
-
     if choice_1_outer == "Others":
         st.write('Coming Soon...')
         st.write('---------------------------------------------------')
@@ -520,5 +570,7 @@ def main():
         st.markdown("LinkedIn: https://www.linkedin.com/in/ashish-gopal-73824572/")
         st.markdown("GitHub: https://github.com/ashishgopal1414")
         st.write('---------------------------------------------------')
+
+
 if __name__ == '__main__':
-	main()
+    main()

@@ -194,6 +194,8 @@ def analysis_data(df):
                 df_crosstab_overall = pd.crosstab(index=data_df[col_X], columns=data_df[col_y])
                 # st.write(df_crosstab_overall)
                 # st.write(df_crosstab_overall.shape)
+                # st.write(df_crosstab_overall.columns)
+
                 for col in list(df_crosstab_overall.columns):
                     if len(df_crosstab_overall.columns) == 1:
                         if col == 1:
@@ -228,25 +230,40 @@ def analysis_data(df):
                     ## Chi Sq. Test
                     ## if shape of crosstab >0 only then running the chi sq. test
                     df_crosstab = pd.crosstab(index=df_cluster[col_X], columns=df_cluster[col_y])
-                    # df_crosstab = pd.DataFrame(df_crosstab)
+
+                    if df_crosstab.empty:
+                        df_crosstab = pd.DataFrame(df_crosstab, columns=[0, 1])
+                        df_crosstab.index.name = col_X
                     # st.write(df_crosstab)
+
                     for col in list(df_crosstab.columns):
+                        # st.write(f'Length : {len(df_crosstab.columns)}')
+                        # st.write(f'Columns: {col}')
+
                         if len(df_crosstab.columns)==1:
                             if col == 1:
                                 df_crosstab['EmpExit0'] = np.nan
+                                df_crosstab['EmpExit1'] = np.nan
                                 df_crosstab['EmpExit1'] = df_crosstab.iloc[:,0]
                                 df_crosstab.drop(columns=col, inplace=True)
                             elif col == 0:
+                                df_crosstab['EmpExit0'] = np.nan
                                 df_crosstab['EmpExit0'] = df_crosstab.iloc[:,0]
                                 df_crosstab['EmpExit1'] = np.nan
                                 df_crosstab.drop(columns=col, inplace=True)
+
                         elif len(df_crosstab.columns)==2:
                             df_crosstab.columns = ['EmpExit0', 'EmpExit1']
 
                     # st.write(df_crosstab)
+                    # st.write(df_crosstab.columns)
                     # df_crosstab.columns = ['EmpExit0', 'EmpExit1']
-                    df_crosstab['Exit Ratio %'] = np.divide(df_crosstab['EmpExit1'],
-                                                        (df_crosstab['EmpExit1'] + df_crosstab['EmpExit0'])) * 100
+                    try:
+                        df_crosstab['Exit Ratio %'] = np.divide(df_crosstab['EmpExit1'],
+                                                                (df_crosstab['EmpExit1'] + df_crosstab['EmpExit0'])) * 100
+                    except Exception as e:
+                        df_crosstab['Exit Ratio %'] = np.nan
+
                     df_crosstab.sort_values(by='EmpExit1', ascending=False, inplace=True)
 
                     # savepath = os.path.join(dirpath, clus)
@@ -361,107 +378,178 @@ def analysis_data(df):
                 if ((None not in select_dimension_val) and len(select_dimension_val)>0):
                     # st.write(f'{select_dimension} vs {select_target}')
                     df_filter2 = df_filter[df_filter[select_dimension].isin(select_dimension_val)]
+                    st.write('##################################################################################################')
+
+                    select_analysis = st.radio('Select Analysis Level', [None, 'Drilldown', 'Summarized'])
                     st.write(
                         '##################################################################################################')
-                    select_dimension2 = st.selectbox('Select Dimension2', df_filter2.columns)
+                    if select_analysis == 'Summarized':
+                        col1, col2, col3 = st.columns(3)
+                        # col1, col2= st.columns(2)
+                        select_dimension_summary = col1.multiselect('Select Dimensions for which analysis need to be summarized',
+                                                                    (['All Dimensions ******'] + list(df_filter2.columns)))
+                        # col1.write(select_dimension_summary)
 
-                    if ((select_dimension2 is not None)):
-                        st.write(f'{select_dimension2} vs {select_target}')
-                        # st.write(df_filter2)
-                        results_df2 = data_grouping2(data_df=df_filter2,
-                                                     feature_col=select_dimension2,
-                                                     target_col=select_target)
-                        st.write(results_df2)
-                        st.markdown(str('<button type="button">' + get_table_download_link(results_df2) + '</button>'),
-                                    unsafe_allow_html=True)
-                        ################################################################################
-                        select_dimension_val2 = st.multiselect('Select Dimension2 Value',
-                                                             list(set(list(df_filter2[select_dimension2]))))
+                        top_k = int(col2.number_input('How many Top k rows required?', min_value=1, max_value=10, value=5, step=1))
+                        # col2.write(top_k)
 
-                        if ((None not in select_dimension_val2) and len(select_dimension_val2)>0):
-                            # st.write(f'{select_dimension} vs {select_target}')
-                            df_filter3 = df_filter2[df_filter2[select_dimension2].isin(select_dimension_val2)]
-                            st.write(
-                                '##################################################################################################')
-                            select_dimension3 = st.selectbox('Select Dimension3', df_filter3.columns)
+                        # min_thresh = col3.number_input('What is the minimum threshold for #of employees required?', 0, 1000, 20)
+                        flag_avg = col3.checkbox('Select to filter only records > Average Value')
 
-                            if ((select_dimension3 is not None)):
-                                st.write(f'{select_dimension3} vs {select_target}')
+                        if ((st.checkbox('Click to Proceed Analysis')) & (len(select_dimension_summary) >0)):
+                            for colx in select_dimension_val:
+                                # st.write(f"Analysis for {select_dimension}=='{colx}' vs {select_target}")
+                                df_filter3 = df_filter2[df_filter2[select_dimension] == colx].copy()
 
-                                results_df3 = data_grouping2(data_df=df_filter3,
-                                                             feature_col=select_dimension3,
-                                                             target_col=select_target)
-                                st.write(results_df3)
+                                df_combined = pd.DataFrame()
+
+                                if 'All Dimensions ******' in select_dimension_summary:
+                                    select_dimension_summary = list(df_filter3.columns)
+
+
+                                for col in select_dimension_summary:
+                                    # st.write("--------------------------------------------------------------------")
+                                    # st.write(f'{col} vs {select_target}')
+                                    # st.write(df_filter3)
+                                    results_df2 = data_grouping2(data_df=df_filter3,
+                                                                 feature_col=col,
+                                                                 target_col=select_target)
+                                    results_df2.sort_values(by='FilteredOverall_EmpExit1', inplace=True, ascending=False)
+                                    results_df2 = results_df2.reset_index()
+
+                                    ## Flag to whether filter out records > avg for that column
+                                    if flag_avg == True:
+                                        # st.write(results_df2['FilteredOverall_EmpExit1'].mean())
+                                        results_df2 = results_df2[results_df2['FilteredOverall_EmpExit1'] >= results_df2['FilteredOverall_EmpExit1'].mean()].copy()
+                                        # st.write(results_df2)
+                                    if results_df2.shape[0]>top_k:
+                                        results_df2 = results_df2.head(top_k)
+                                    # st.write(results_df2)
+                                    # st.markdown(
+                                    #     str('<button type="button">' + get_table_download_link(results_df2) + '</button>'),
+                                    #     unsafe_allow_html=True)
+
+                                    df_temp = results_df2.copy()
+                                    df_temp['Dimension'] = col
+                                    df_temp['Dimension_value'] = df_temp[col].astype(str)
+                                    df_temp.drop(columns=col, inplace=True)
+                                    cols = ['Dimension', 'Dimension_value'] + [cols for cols in list(df_temp.columns) if cols not in ['Dimension', 'Dimension_value']]
+
+                                    if df_combined.empty:
+                                        df_combined = df_temp.copy()
+                                    else:
+                                        df_combined = pd.concat([df_combined, df_temp], axis=0)
+
+                                df_combined = df_combined[cols].copy()
+                                st.write("--------------------------------------------------------------------")
+
+                                st.markdown(f"<b>* * * Download Combined Results for {select_dimension}=='{colx}'! * * *</b>",unsafe_allow_html=True)
+
+                                st.write(df_combined)
                                 st.markdown(
-                                    str('<button type="button">' + get_table_download_link(results_df3) + '</button>'),
+                                    str('<button type="button">' + get_table_download_link(df_combined) + '</button>'),
                                     unsafe_allow_html=True)
-                                ################################################################################
-                                select_dimension_val3 = st.multiselect('Select Dimension3 Value',
-                                                                     list(
-                                                                         set(list(df_filter3[select_dimension3]))))
 
-                                if ((None not in select_dimension_val3) and len(select_dimension_val3)>0):
-                                    # st.write(f'{select_dimension} vs {select_target}')
-                                    df_filter4 = df_filter3[df_filter3[select_dimension3].isin(select_dimension_val3)]
-                                    st.write(
-                                        '##################################################################################################')
-                                    select_dimension4 = st.selectbox('Select Dimension4', df_filter4.columns)
+                    elif select_analysis == 'Drilldown':
+                        select_dimension2 = st.selectbox('Select Dimension2', df_filter2.columns)
 
-                                    if ((select_dimension4 is not None)):
-                                        st.write(f'{select_dimension4} vs {select_target}')
+                        if ((select_dimension2 is not None)):
+                            st.write(f'{select_dimension2} vs {select_target}')
+                            # st.write(df_filter2)
+                            results_df2 = data_grouping2(data_df=df_filter2,
+                                                         feature_col=select_dimension2,
+                                                         target_col=select_target)
+                            st.write(results_df2)
+                            st.markdown(str('<button type="button">' + get_table_download_link(results_df2) + '</button>'),
+                                        unsafe_allow_html=True)
+                            ################################################################################
+                            select_dimension_val2 = st.multiselect('Select Dimension2 Value',
+                                                                 list(set(list(df_filter2[select_dimension2]))))
 
-                                        results_df4 = data_grouping2(data_df=df_filter4,
-                                                                     feature_col=select_dimension4,
-                                                                     target_col=select_target)
-                                        st.write(results_df4)
-                                        st.markdown(str('<button type="button">' + get_table_download_link(
-                                            results_df4) + '</button>'),
-                                                    unsafe_allow_html=True)
-                                        ################################################################################
-                                        select_dimension_val4 = st.multiselect('Select Dimension4 Value',
-                                                                             list(
-                                                                                 set(list(df_filter4[select_dimension4]))))
+                            if ((None not in select_dimension_val2) and len(select_dimension_val2)>0):
+                                # st.write(f'{select_dimension} vs {select_target}')
+                                df_filter3 = df_filter2[df_filter2[select_dimension2].isin(select_dimension_val2)]
+                                st.write(
+                                    '##################################################################################################')
+                                select_dimension3 = st.selectbox('Select Dimension3', df_filter3.columns)
 
-                                        if ((None not in select_dimension_val4) and len(select_dimension_val4)>0):
-                                            # st.write(f'{select_dimension} vs {select_target}')
-                                            df_filter5 = df_filter4[df_filter4[select_dimension4].isin(select_dimension_val4)]
-                                            st.write(
-                                                '##################################################################################################')
-                                            select_dimension5 = st.selectbox('Select Dimension5', df_filter5.columns)
+                                if ((select_dimension3 is not None)):
+                                    st.write(f'{select_dimension3} vs {select_target}')
 
-                                            if ((select_dimension5 is not None)):
-                                                st.write(f'{select_dimension5} vs {select_target}')
+                                    results_df3 = data_grouping2(data_df=df_filter3,
+                                                                 feature_col=select_dimension3,
+                                                                 target_col=select_target)
+                                    st.write(results_df3)
+                                    st.markdown(
+                                        str('<button type="button">' + get_table_download_link(results_df3) + '</button>'),
+                                        unsafe_allow_html=True)
+                                    ################################################################################
+                                    select_dimension_val3 = st.multiselect('Select Dimension3 Value',
+                                                                         list(
+                                                                             set(list(df_filter3[select_dimension3]))))
 
-                                                results_df5 = data_grouping2(data_df=df_filter5,
-                                                                             feature_col=select_dimension5,
-                                                                             target_col=select_target)
-                                                st.write(results_df5)
-                                                st.markdown(str('<button type="button">' + get_table_download_link(
-                                                    results_df5) + '</button>'),
-                                                            unsafe_allow_html=True)
-                                                ################################################################################
-                                                select_dimension_val5 = st.multiselect('Select Dimension5 Value',
-                                                                                       list(
-                                                                                           set(list(df_filter5[
-                                                                                                        select_dimension5]))))
+                                    if ((None not in select_dimension_val3) and len(select_dimension_val3)>0):
+                                        # st.write(f'{select_dimension} vs {select_target}')
+                                        df_filter4 = df_filter3[df_filter3[select_dimension3].isin(select_dimension_val3)]
+                                        st.write(
+                                            '##################################################################################################')
+                                        select_dimension4 = st.selectbox('Select Dimension4', df_filter4.columns)
 
-                                                if ((None not in select_dimension_val5) and len(
-                                                        select_dimension_val5) > 0):
-                                                    # st.write(f'{select_dimension} vs {select_target}')
-                                                    df_filter6 = df_filter5[
-                                                        df_filter5[select_dimension5].isin(select_dimension_val5)]
-                                                    st.write(
-                                                        '##################################################################################################')
-                                                    select_dimension6 = st.selectbox('Select Dimension6',
-                                                                                     df_filter6.columns)
+                                        if ((select_dimension4 is not None)):
+                                            st.write(f'{select_dimension4} vs {select_target}')
 
-                                                    if ((select_dimension6 is not None)):
-                                                        st.write(f'{select_dimension6} vs {select_target}')
+                                            results_df4 = data_grouping2(data_df=df_filter4,
+                                                                         feature_col=select_dimension4,
+                                                                         target_col=select_target)
+                                            st.write(results_df4)
+                                            st.markdown(str('<button type="button">' + get_table_download_link(
+                                                results_df4) + '</button>'),
+                                                        unsafe_allow_html=True)
+                                            ################################################################################
+                                            select_dimension_val4 = st.multiselect('Select Dimension4 Value',
+                                                                                 list(
+                                                                                     set(list(df_filter4[select_dimension4]))))
 
-                                                        results_df6 = data_grouping2(data_df=df_filter6,
-                                                                                     feature_col=select_dimension6,
-                                                                                     target_col=select_target)
-                                                        st.write(results_df6)
+                                            if ((None not in select_dimension_val4) and len(select_dimension_val4)>0):
+                                                # st.write(f'{select_dimension} vs {select_target}')
+                                                df_filter5 = df_filter4[df_filter4[select_dimension4].isin(select_dimension_val4)]
+                                                st.write(
+                                                    '##################################################################################################')
+                                                select_dimension5 = st.selectbox('Select Dimension5', df_filter5.columns)
+
+                                                if ((select_dimension5 is not None)):
+                                                    st.write(f'{select_dimension5} vs {select_target}')
+
+                                                    results_df5 = data_grouping2(data_df=df_filter5,
+                                                                                 feature_col=select_dimension5,
+                                                                                 target_col=select_target)
+                                                    st.write(results_df5)
+                                                    st.markdown(str('<button type="button">' + get_table_download_link(
+                                                        results_df5) + '</button>'),
+                                                                unsafe_allow_html=True)
+                                                    ################################################################################
+                                                    select_dimension_val5 = st.multiselect('Select Dimension5 Value',
+                                                                                           list(
+                                                                                               set(list(df_filter5[
+                                                                                                            select_dimension5]))))
+
+                                                    if ((None not in select_dimension_val5) and len(
+                                                            select_dimension_val5) > 0):
+                                                        # st.write(f'{select_dimension} vs {select_target}')
+                                                        df_filter6 = df_filter5[
+                                                            df_filter5[select_dimension5].isin(select_dimension_val5)]
+                                                        st.write(
+                                                            '##################################################################################################')
+                                                        select_dimension6 = st.selectbox('Select Dimension6',
+                                                                                         df_filter6.columns)
+
+                                                        if ((select_dimension6 is not None)):
+                                                            st.write(f'{select_dimension6} vs {select_target}')
+
+                                                            results_df6 = data_grouping2(data_df=df_filter6,
+                                                                                         feature_col=select_dimension6,
+                                                                                         target_col=select_target)
+                                                            st.write(results_df6)
                                                 
                                                 
                                                 
