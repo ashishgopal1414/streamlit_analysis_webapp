@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 import matplotlib
 matplotlib.use("Agg")
 import seaborn as sns
+import plotly.express as px
 import missingno as msno
 from pandas_profiling import ProfileReport
 import io, os, shutil, re, time, pickle, pathlib, glob, base64, xlsxwriter
@@ -353,7 +354,22 @@ def analysis_data(df):
         # plt.show()
         st.write(Churn_rate)
         ##############################################################################################
+        def plot_Attition(data_df, col_x, col_y, title='Employee Attrition %', data_show_only = False):
+            data_df2 = pd.crosstab(index=data_df[col_x], columns=data_df[col_y])
+            data_df2.columns = ['EmpExit0', 'EmpExit1']
+            data_df2['Exit Ratio %'] = np.divide(data_df2['EmpExit1'],
+                                                            (data_df2['EmpExit1'] + data_df2['EmpExit0'])) * 100
 
+            data_df2.sort_values(by='EmpExit1', ascending=False, inplace=True)
+            fig = px.bar(data_df2,  y='Exit Ratio %', title=title)
+            if data_show_only == False:
+                st.plotly_chart(fig)
+            if data_show_only == True:
+                st.write(title)
+            st.write(data_df2)
+
+        plot_Attition(data_df = df, col_x=cluster_col, col_y=target_col)
+        ##############################################################################################
         selected_clusters = st.multiselect('Available Clusters', (list(df[cluster_col].unique())))
         if len(selected_clusters)>0:
             st.markdown(list(selected_clusters))
@@ -371,6 +387,11 @@ def analysis_data(df):
                 st.write(results_df)
                 st.markdown(str('<button type="button">' + get_table_download_link(results_df) + '</button>'),
                             unsafe_allow_html=True)
+                for cluster_val in selected_clusters:
+                    df_filter2 = df_filter[df_filter[cluster_col] == cluster_val].copy()
+                    plot_Attition(data_df=df_filter2, col_x=select_dimension, col_y=target_col,
+                                  title=f'Employee Attrition % - {cluster_val}',
+                                  data_show_only = True)
                 ################################################################################
                 select_dimension_val = st.multiselect('Select Dimension Value',
                                                     list(set(list(df_filter[select_dimension]))))
