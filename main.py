@@ -79,7 +79,8 @@ def preprocess_data(data_df):
     st.write('---------------------------------------------------')
     if not data_df.empty:
         all_columns = data_df.columns.to_list()
-        if st.checkbox("Data Preprocess (Keep checked in to add steps)"):
+        flag_preprocess = st.checkbox("Data Preprocess (Keep checked in to add steps)",value=True)
+        if flag_preprocess:
             ## Receive a function to be called for Preprocessing
             df = data_df.copy()
             txt = st.text_area(
@@ -369,6 +370,23 @@ def analysis_data(df):
             st.write(data_df2)
 
         plot_Attition(data_df = df, col_x=cluster_col, col_y=target_col)
+
+        ## Grouping clusters with their respective ids (indexes) to identify clusters with higher percentage of Churn
+
+        ## Overall Churn
+        group_all = (100 * df[df[target_col] == 1].groupby(by=[target_col]).size() / len(df.index))
+        group_all = group_all.reset_index(drop=True)
+        group_all = pd.DataFrame(group_all, columns=["Churn Percentage"])
+        # group_all
+        group = (100 * df[df[target_col] == 1].groupby(by=[cluster_col, target_col]).size() / len(df.index))
+        group = group.reset_index(level=1, drop=True)
+        group = pd.DataFrame(group, columns=["Churn Percentage"])
+        group['Overall'] = group_all["Churn Percentage"][0]
+        group['Overall%'] = (group["Churn Percentage"] / group["Overall"]) * 100
+        group.sort_values(by=["Churn Percentage"], ascending=False)
+        fig = px.pie(group.reset_index(), names=cluster_col, values='Overall%',
+                     title='Overall Attrition% division across Clusters')
+        st.plotly_chart(fig)
         ##############################################################################################
         selected_clusters = st.multiselect('Available Clusters', (list(df[cluster_col].unique())))
         if len(selected_clusters)>0:
@@ -605,7 +623,8 @@ def main():
         if choice_1 == "1. Data Import":
             data = None
             show_file = st.empty()
-            if st.checkbox("Click to Upload data"):
+            flag_uploaddata = st.checkbox("Click to Upload data", value=True)
+            if flag_uploaddata:
                 data = st.file_uploader("Upload Dataset : ",type=file_types)
             if not data:
                 show_file.info("Please upload a file of type: " + ", ".join(file_types))
