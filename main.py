@@ -369,7 +369,8 @@ def analysis_data(df):
                 st.write(title)
             st.write(data_df2)
 
-        plot_Attition(data_df = df, col_x=cluster_col, col_y=target_col)
+        #plot_Attition(data_df = df, col_x=cluster_col, col_y=target_col)
+	plot_Attition(data_df = df, col_x=cluster_col, col_y=target_col, title='Clusterwise Employee Attrition%')
 
         ## Grouping clusters with their respective ids (indexes) to identify clusters with higher percentage of Churn
 
