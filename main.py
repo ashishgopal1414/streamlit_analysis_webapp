@@ -204,7 +204,7 @@ def data_grouping(data_df, feature_col, target_col):
 
     for col_X in cols_x:
         print(
-            '##################################################################################################')
+            '########################################################################################')
         print(f'{col_X} vs {col_y}')
 
         #     df_crosstab_overall = pd.DataFrame()
@@ -321,7 +321,7 @@ def data_visual(data_df, feature_col, target_col):
 
 
 
-########################################################################################################
+########################################################################################
 def data_grouping2(data_df, feature_col, target_col):
     data_df = data_df.copy()
     cols_x = [feature_col]
@@ -330,7 +330,7 @@ def data_grouping2(data_df, feature_col, target_col):
     # st.write(data_df.shape)
 
     for col_X in cols_x:
-        print('##################################################################################################')
+        print('########################################################################################')
         print(f'{col_X} vs {col_y}')
 
         # df_crosstab_overall = pd.DataFrame()
@@ -439,7 +439,7 @@ def analyze_data(data):
         # st.write(df_filter.shape)
         # st.write(df_filter.columns)
         st.write(
-            '##################################################################################################')
+            '########################################################################################')
         select_dimension = st.selectbox('Select Dimension', (list(df_filter.columns)))
 
         if (st.checkbox('Click to proceed!')):
@@ -497,11 +497,11 @@ def analyze_data(data):
                     # st.write(results_df)
                     df_filter2 = df_filter[df_filter[select_dimension].isin(select_dimension_val)]
                     st.write(
-                        '##################################################################################################')
+                        '########################################################################################')
 
                     select_analysis = st.radio('Select Analysis Level', [None, 'Drilldown', 'Summarized'])
                     st.write(
-                        '##################################################################################################')
+                        '########################################################################################')
                     if select_analysis == 'Summarized':
                         col1, col2, col3 = st.columns(3)
                         # col1, col2= st.columns(2)
@@ -689,7 +689,7 @@ def analyze_data(data):
                                 # st.write(f'{select_dimension} vs {select_target}')
                                 df_filter3 = df_filter2[df_filter2[select_dimension2].isin(select_dimension_val2)]
                                 st.write(
-                                    '##################################################################################################')
+                                    '########################################################################################')
                                 select_dimension3 = st.selectbox('Select Dimension3', df_filter3.columns)
 
                                 if ((select_dimension3 is not None)):
@@ -717,7 +717,7 @@ def analyze_data(data):
                                         df_filter4 = df_filter3[
                                             df_filter3[select_dimension3].isin(select_dimension_val3)]
                                         st.write(
-                                            '##################################################################################################')
+                                            '########################################################################################')
                                         select_dimension4 = st.selectbox('Select Dimension4', df_filter4.columns)
 
                                         if ((select_dimension4 is not None)):
@@ -744,7 +744,7 @@ def analyze_data(data):
                                                 df_filter5 = df_filter4[
                                                     df_filter4[select_dimension4].isin(select_dimension_val4)]
                                                 st.write(
-                                                    '##################################################################################################')
+                                                    '########################################################################################')
                                                 select_dimension5 = st.selectbox('Select Dimension5',
                                                                                  df_filter5.columns)
 
@@ -773,7 +773,7 @@ def analyze_data(data):
                                                         df_filter6 = df_filter5[
                                                             df_filter5[select_dimension5].isin(select_dimension_val5)]
                                                         st.write(
-                                                            '##################################################################################################')
+                                                            '########################################################################################')
                                                         select_dimension6 = st.selectbox('Select Dimension6',
                                                                                          df_filter6.columns)
 
