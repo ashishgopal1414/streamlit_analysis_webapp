@@ -234,19 +234,28 @@ def data_visual(data_df, feature_col, target_col):
         ## Attrition%
         # data_grp.reset_index().plot.bar(x=feature_col,
         #                                 y=['Overall_ExitRatio%'], title='Attrition%')
-        fig = px.bar(data_grp.reset_index(), x=feature_col, y='Overall_ExitRatio%', title='Attrition%')
+        fig = px.bar(data_grp.reset_index(),
+                     y=feature_col, x='Overall_ExitRatio%', orientation='h',
+                     title='Attrition%')
+        fig.update_layout(yaxis={'categoryorder': 'total ascending'})
         st.plotly_chart(fig)
         ##########################################
         ## Exited Employee
         # data_grp.reset_index().plot.bar(x=feature_col,
         #                                 y=['Overall_EmpExit1'], title='Exited Employees')
-        fig = px.bar(data_grp.reset_index(), x=feature_col, y='Overall_EmpExit1', title='Exited Employees')
+        fig = px.bar(data_grp.reset_index(),
+                     y=feature_col, x='Overall_EmpExit1', orientation='h' ,
+                     title='Exited Employees')
+        fig.update_layout(yaxis={'categoryorder': 'total ascending'})
         st.plotly_chart(fig)
         ##########################################
         ## Headcount Employee
         data_grp.reset_index().plot.bar(x=feature_col,
                                         y=['Overall_EmpExit0'], title='Headcount Employees')
-        fig = px.bar(data_grp.reset_index(), x=feature_col, y='Overall_EmpExit0', title='Headcount Employees')
+        fig = px.bar(data_grp.reset_index(),
+                     y=feature_col, x='Overall_EmpExit0',orientation='h',
+                     title='Headcount Employees')
+        fig.update_layout(yaxis={'categoryorder': 'total ascending'})
         st.plotly_chart(fig)
         ##########################################
         # st.write(data_grp)
