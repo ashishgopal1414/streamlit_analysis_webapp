@@ -19,6 +19,7 @@ import numpy as numpy
 # Data Viz Packages
 import matplotlib.pyplot as plt
 import matplotlib
+
 matplotlib.use("Agg")
 import seaborn as sns
 import plotly.express as px
@@ -27,37 +28,38 @@ from pandas_profiling import ProfileReport
 import io, os, shutil, re, time, pickle, pathlib, glob, base64, xlsxwriter
 from io import BytesIO
 
-#constants
+# constants
 random_state = 42
-plotColor    = ['b','g','r','m','c', 'y']
-markers      = ['+','o','*','^','v','>','<']
+plotColor = ['b', 'g', 'r', 'm', 'c', 'y']
+markers = ['+', 'o', '*', '^', 'v', '>', '<']
 
-#set up
+# set up
 sns.set(style='whitegrid')
 #########################################################
 
 ## Disable Warning
 st.set_option('deprecation.showfileUploaderEncoding', False)
 # st.set_option('deprecation.showPyplotGlobalUse', False)
-#%%
+# %%
 
 data_flag = 0
 
-#%%
+# %%
 current_path = os.getcwd()
 
 ## Create sub directories if not created: "Raw Data" , "Batch Wise Data" , "Aggregated Data"
-folder_names = [name for name in ["Raw Data" , "Modified Data"]]
+folder_names = [name for name in ["Raw Data", "Modified Data"]]
 
 for folder_name in folder_names:
     if not os.path.exists(folder_name):
         os.makedirs(folder_name)
-#%%
+# %%
 
 datafile_path = os.path.join(current_path, "Raw Data", "data.csv")
 modifiedfile_path = os.path.join(current_path, "Modified Data", "data.csv")
 
 data_df = pd.DataFrame()
+
 
 ################################################################################
 # from typing import Dict
@@ -77,6 +79,7 @@ def load_data():
             st.write(data_df)
     return data_df
 
+
 ################################################################################
 
 def load_modified_data():
@@ -88,13 +91,15 @@ def load_modified_data():
         if st.checkbox("Click to view Modified data"):
             st.write(data_df)
     return data_df
+
+
 ################################################################################
 
 def preprocess_data(data_df):
     st.write('---------------------------------------------------')
     if not data_df.empty:
         all_columns = data_df.columns.to_list()
-        flag_preprocess = st.checkbox("Data Preprocess (Keep checked in to add steps)",value=True)
+        flag_preprocess = st.checkbox("Data Preprocess (Keep checked in to add steps)", value=True)
         if flag_preprocess:
             ## Receive a function to be called for Preprocessing
             df = data_df.copy()
@@ -119,14 +124,16 @@ def preprocess_data(data_df):
         st.markdown('**No Data Available to show!**.')
     st.write('---------------------------------------------------')
 
+
 ################################################################################
 def to_excel(df):
     output = BytesIO()
     writer = pd.ExcelWriter(output, engine='xlsxwriter')
-    df.to_excel(writer, index = True, sheet_name='Sheet1',float_format="%.2f")
+    df.to_excel(writer, index=True, sheet_name='Sheet1', float_format="%.2f")
     writer.save()
     processed_data = output.getvalue()
     return processed_data
+
 
 def get_table_download_link(df, file_name='Predictions'):
     """Generates a link allowing the data in a given panda dataframe to be downloaded
@@ -135,7 +142,7 @@ def get_table_download_link(df, file_name='Predictions'):
     """
     val = to_excel(df)
     b64 = base64.b64encode(val)  # val looks like b'...'
-    return f'<a href="data:application/octet-stream;base64,{b64.decode()}" download="{file_name}.xlsx">Download Excel file</a>' # decode b'abc' => abc
+    return f'<a href="data:application/octet-stream;base64,{b64.decode()}" download="{file_name}.xlsx">Download Excel file</a>'  # decode b'abc' => abc
 
 
 def Generate_bar_graph2(x, y, x_title, y_title, chart_title, color=plotColor):
@@ -196,6 +203,7 @@ def plot_Attrition(data_df, col_x, col_y, title='Employee Attrition %', data_sho
     # plt.show()
     st.pyplot(plt)
 
+
 # In[9]:
 def data_grouping(data_df, feature_col, target_col):
     data_df = data_df.copy()
@@ -203,8 +211,7 @@ def data_grouping(data_df, feature_col, target_col):
     col_y = target_col
 
     for col_X in cols_x:
-        print(
-            '########################################################################################')
+        print('########################################################################################')
         print(f'{col_X} vs {col_y}')
 
         #     df_crosstab_overall = pd.DataFrame()
@@ -223,6 +230,7 @@ def data_grouping(data_df, feature_col, target_col):
         #     df_crosstab_overall.to_csv(os.path.join(dirpath,fname_overall))
         return df_crosstab_overall
 
+
 def data_visual(data_df, feature_col, target_col):
     data_df = data_df.copy()
 
@@ -234,8 +242,7 @@ def data_visual(data_df, feature_col, target_col):
         ## Attrition%
         # data_grp.reset_index().plot.bar(x=feature_col,
         #                                 y=['Overall_ExitRatio%'], title='Attrition%')
-        fig = px.bar(data_grp.reset_index(),
-                     y=feature_col, x='Overall_ExitRatio%', orientation='h',
+        fig = px.bar(data_grp.reset_index(), y=feature_col, x='Overall_ExitRatio%',
                      title='Attrition%')
         fig.update_layout(yaxis={'categoryorder': 'total ascending'})
         st.plotly_chart(fig)
@@ -243,18 +250,14 @@ def data_visual(data_df, feature_col, target_col):
         ## Exited Employee
         # data_grp.reset_index().plot.bar(x=feature_col,
         #                                 y=['Overall_EmpExit1'], title='Exited Employees')
-        fig = px.bar(data_grp.reset_index(),
-                     y=feature_col, x='Overall_EmpExit1', orientation='h' ,
-                     title='Exited Employees')
+        fig = px.bar(data_grp.reset_index(), y=feature_col, x='Overall_EmpExit1', title='Exited Employees')
         fig.update_layout(yaxis={'categoryorder': 'total ascending'})
         st.plotly_chart(fig)
         ##########################################
         ## Headcount Employee
         data_grp.reset_index().plot.bar(x=feature_col,
                                         y=['Overall_EmpExit0'], title='Headcount Employees')
-        fig = px.bar(data_grp.reset_index(),
-                     y=feature_col, x='Overall_EmpExit0',orientation='h',
-                     title='Headcount Employees')
+        fig = px.bar(data_grp.reset_index(), y=feature_col, x='Overall_EmpExit0', title='Headcount Employees')
         fig.update_layout(yaxis={'categoryorder': 'total ascending'})
         st.plotly_chart(fig)
         ##########################################
@@ -264,7 +267,7 @@ def data_visual(data_df, feature_col, target_col):
         data_df[target_col] = data_df[target_col].astype('str')
         print(data_df[target_col].value_counts())
         data_df[target_col] = data_df[target_col].map({'0': 'Active', '0.0': 'Active',
-                                       '1': 'Churned', '1.0': 'Churned'})
+                                                       '1': 'Churned', '1.0': 'Churned'})
 
         ##########################################
         # sns.catplot(x=target_col, y=feature_col, data=data_df, kind="box", orient='v');
@@ -277,17 +280,25 @@ def data_visual(data_df, feature_col, target_col):
         data_df[feature_col] = data_df[feature_col].astype('float')
 
         data_df[target_col] = data_df[target_col].map({'Active': '0',
-                                       'Churned': '1'})
+                                                       'Churned': '1'})
         data_df[target_col] = data_df[target_col].astype('float')
 
         df_filtered = data_df.copy()
+        st.write('---------------')
+        bivar_choice = st.radio('Bi-Variate Analysis',
+                                [None,
+                                 'Filter Data - Single Variable',
+                                 'Filter Data - Double Variables',
+                                 'No Filtering required - Single Variable',
+                                 'No Filtering required - Double Variables'
+                                 ])
 
-        bivar_choice = st.radio('Bi-Variate Analysis', [None, 'Filter Data', 'No Filtering required'])
-
-        if bivar_choice == 'Filter Data':
+        if bivar_choice == 'Filter Data - Single Variable':
             col1, col2 = st.columns(2)
-            min_val = col1.number_input(f'Enter Min. Value for {feature_col}', min_value=0.0, max_value=1000.0, step=0.1, value=0.0)
-            max_val = col2.number_input(f'Enter Max. Value for {feature_col}', min_value=0.0, max_value=1000.0, step=0.1, value=1.0)
+            min_val = col1.number_input(f'Enter Min. Value for {feature_col}', min_value=0.0, max_value=1000.0,
+                                        step=0.1, value=0.0)
+            max_val = col2.number_input(f'Enter Max. Value for {feature_col}', min_value=0.0, max_value=1000.0,
+                                        step=0.1, value=1.0)
 
             if st.checkbox('Click to proceed with plotting:'):
                 df_filtered = data_df[((data_df[feature_col] >= min_val) &
@@ -295,42 +306,90 @@ def data_visual(data_df, feature_col, target_col):
                 df_filtered[target_col] = df_filtered[target_col].astype('str')
                 df_filtered[target_col] = df_filtered[target_col].map({'0': 'Active',
                                                                        '0.0': 'Active',
-                                                               '1': 'Churned', '1.0': 'Churned'})
+                                                                       '1': 'Churned', '1.0': 'Churned'})
                 fig = px.box(df_filtered, y=feature_col, x=target_col);
                 st.plotly_chart(fig)
                 ###########################################
                 df_filtered[feature_col] = df_filtered[feature_col].astype('float')
                 df_filtered[target_col] = df_filtered[target_col].map({'Active': '0',
-                                                               'Churned': '1'})
+                                                                       'Churned': '1'})
                 df_filtered[target_col] = df_filtered[target_col].astype('float')
 
                 f, ax = plt.subplots(figsize=(15, 6))
                 sns.regplot(x=feature_col, y=target_col, data=df_filtered, fit_reg=True, logistic=True, ax=ax);
                 st.pyplot(plt)
                 ###########################################
-        elif bivar_choice == 'No Filtering required':
+        elif bivar_choice == 'Filter Data - Double Variable':
+            col1, col2 = st.columns(2)
+            min_val = col1.number_input(f'Enter Min. Value for {feature_col}', min_value=0.0, max_value=1000.0,
+                                        step=0.1, value=0.0)
+            max_val = col2.number_input(f'Enter Max. Value for {feature_col}', min_value=0.0, max_value=1000.0,
+                                        step=0.1, value=1.0)
+
+            col_by_list = [col for col in df_filtered.columns if df_filtered[col].dtype in ['object']]
+            col_by = st.selectbox('Grouped by feature', col_by_list)
             f, ax = plt.subplots(figsize=(15, 6))
-            sns.regplot(x=feature_col, y=target_col, data=df_filtered, fit_reg=True, logistic=True, ax=ax);
+            # sns.regplot(x=feature_col, y=target_col, data=df_filtered, fit_reg=True, logistic=True, ax=ax);
+            sns.lmplot(x=feature_col, y=target_col, data=df_filtered,
+                       fit_reg=True, logistic=True, hue=col_by
+                       # ,ax=ax
+                       );
+
+            if st.checkbox('Click to proceed with plotting:'):
+                df_filtered = data_df[((data_df[feature_col] >= min_val) &
+                                       (data_df[feature_col] <= max_val))].copy()
+                df_filtered[target_col] = df_filtered[target_col].astype('str')
+                df_filtered[target_col] = df_filtered[target_col].map({'0': 'Active',
+                                                                       '0.0': 'Active',
+                                                                       '1': 'Churned', '1.0': 'Churned'})
+                fig = px.box(df_filtered, y=feature_col, x=target_col);
+                st.plotly_chart(fig)
+                ###########################################
+                df_filtered[feature_col] = df_filtered[feature_col].astype('float')
+                df_filtered[target_col] = df_filtered[target_col].map({'Active': '0',
+                                                                       'Churned': '1'})
+                df_filtered[target_col] = df_filtered[target_col].astype('float')
+
+                f, ax = plt.subplots(figsize=(15, 6))
+                sns.regplot(x=feature_col, y=target_col, data=df_filtered, fit_reg=True, logistic=True, ax=ax);
+                st.pyplot(plt)
+                ###########################################
+        elif bivar_choice == 'No Filtering required - Single Variable':
+            f, ax = plt.subplots(figsize=(15, 6))
+            # sns.regplot(x=feature_col, y=target_col, data=df_filtered, fit_reg=True, logistic=True, ax=ax);
+            sns.lmplot(x=feature_col, y=target_col, data=df_filtered,
+                       fit_reg=True, logistic=True,
+                       # ax=ax
+                       );
+
+            st.pyplot(plt)
+        elif bivar_choice == 'No Filtering required - Double Variables':
+            # st.write(df_filtered.dtypes)
+            col_by_list = [col for col in df_filtered.columns if df_filtered[col].dtype in ['object']]
+            col_by = st.selectbox('Grouped by feature', col_by_list)
+            f, ax = plt.subplots(figsize=(15, 6))
+            # sns.regplot(x=feature_col, y=target_col, data=df_filtered, fit_reg=True, logistic=True, ax=ax);
+            sns.lmplot(x=feature_col, y=target_col, data=df_filtered,
+                       fit_reg=True, logistic=True, hue=col_by
+                       # ,ax=ax
+                       );
+
             st.pyplot(plt)
 
-        if st.checkbox('Scaled Plots:'):
-            f, ax = plt.subplots(figsize=(15, 6))
-            sns.regplot(x=feature_col, y=target_col, data=df_filtered, fit_reg=True, logistic=True, ax=ax);
-            ax.set_xscale('log')
-            st.pyplot(plt)
+            if st.checkbox('Scaled Plots:'):
+                f, ax = plt.subplots(figsize=(15, 6))
+                sns.regplot(x=feature_col, y=target_col, data=df_filtered, fit_reg=True, logistic=True, ax=ax);
+                ax.set_xscale('log')
+                st.pyplot(plt)
 
-            f, ax = plt.subplots(figsize=(15, 6))
-            sns.regplot(x=feature_col, y=target_col, data=df_filtered, fit_reg=True, logistic=True, ax=ax);
-            ax.set_yscale('log')
-            st.pyplot(plt)
-
-
-
+                f, ax = plt.subplots(figsize=(15, 6))
+                sns.regplot(x=feature_col, y=target_col, data=df_filtered, fit_reg=True, logistic=True, ax=ax);
+                ax.set_yscale('log')
+                st.pyplot(plt)
+            st.write('---------------')
 
 
-
-
-########################################################################################
+########################################################################################################
 def data_grouping2(data_df, feature_col, target_col):
     data_df = data_df.copy()
     cols_x = [feature_col]
@@ -412,6 +471,7 @@ def Generate_bar_graph(x, y, x_title, y_title, chart_title, color=plotColor):
     # plt.show()
     st.pyplot(plt)
 
+
 # In[10]:
 
 def analyze_data(data):
@@ -419,7 +479,7 @@ def analyze_data(data):
         df = data.copy()
 
         plotColor = ['b', 'g', 'r', 'm', 'c', 'y']
-        markers   = ['+', 'o', '*', '^', 'v', '>', '<']
+        markers = ['+', 'o', '*', '^', 'v', '>', '<']
 
         # set up
         sns.set(style='whitegrid')
@@ -447,8 +507,7 @@ def analyze_data(data):
         df_filter = df.copy()
         # st.write(df_filter.shape)
         # st.write(df_filter.columns)
-        st.write(
-            '########################################################################################')
+        st.write('#######################################################################################')
         select_dimension = st.selectbox('Select Dimension', (list(df_filter.columns)))
 
         if (st.checkbox('Click to proceed!')):
@@ -460,34 +519,34 @@ def analyze_data(data):
                                            target_col=select_target)
 
                 data_visual(data_df=df, feature_col=select_dimension,
-                                           target_col=select_target)
+                            target_col=select_target)
 
                 # st.write(results_df)
                 results_df['Overall_Headcount'] = results_df[['Overall_EmpExit0']].sum()[0]
-                results_df['Overall_Churned'  ] = results_df[['Overall_EmpExit1']].sum()[0]
-                results_df['%ofOverall_Headcount'] = np.divide(results_df['Overall_EmpExit0'], results_df['Overall_Headcount'])*100
+                results_df['Overall_Churned'] = results_df[['Overall_EmpExit1']].sum()[0]
+                results_df['%ofOverall_Headcount'] = np.divide(results_df['Overall_EmpExit0'],
+                                                               results_df['Overall_Headcount']) * 100
                 results_df['%ofOverall_Churned'] = np.divide(results_df['Overall_EmpExit1'],
-                                                             results_df['Overall_Churned'])*100
+                                                             results_df['Overall_Churned']) * 100
 
                 results_df_display = results_df.copy()
-                results_df_display.rename(columns={'Overall_EmpExit0'   : 'Category_Headcount',
-                                                   'Overall_EmpExit1'   : 'Category_Churn',
-                                                   'Overall_ExitRatio%' : 'Category_Churn%'}, inplace=True)
+                results_df_display.rename(columns={'Overall_EmpExit0': 'Category_Headcount',
+                                                   'Overall_EmpExit1': 'Category_Churn',
+                                                   'Overall_ExitRatio%': 'Category_Churn%'}, inplace=True)
 
-                cols_show = [#'Overall_Headcount',
-                             'Category_Headcount', '%ofOverall_Headcount',
-                             # 'Overall_Churned'  ,
-                             'Category_Churn'    , '%ofOverall_Churned',
-                             'Category_Churn%'
-                             ]
+                cols_show = [  # 'Overall_Headcount',
+                    'Category_Headcount', '%ofOverall_Headcount',
+                    # 'Overall_Churned'  ,
+                    'Category_Churn', '%ofOverall_Churned',
+                    'Category_Churn%'
+                ]
                 results_df_display = results_df_display[cols_show].copy()
                 results_df_display.sort_values(by='Category_Churn', ascending=False, inplace=True)
                 try:
-                    st.write(results_df_display )
+                    st.write(results_df_display)
                 except Exception as e:
                     print('Error while printing!')
                     print(e)
-
 
                 # df_temp = results_df.reset_index()
                 # df_temp.rename(columns = {'Overall_EmpExit0'   : 'Headcount',
@@ -505,45 +564,43 @@ def analyze_data(data):
                     # st.write(f'{select_dimension} vs {select_target}')
                     # st.write(results_df)
                     df_filter2 = df_filter[df_filter[select_dimension].isin(select_dimension_val)]
-                    st.write(
-                        '########################################################################################')
+                    st.write('#######################################################################################')
 
                     select_analysis = st.radio('Select Analysis Level', [None, 'Drilldown', 'Summarized'])
-                    st.write(
-                        '########################################################################################')
+                    st.write('#######################################################################################')
                     if select_analysis == 'Summarized':
                         col1, col2, col3 = st.columns(3)
                         # col1, col2= st.columns(2)
                         select_dimension_summary = col1.multiselect(
                             'Select Dimensions for which analysis need to be summarized',
                             (['All Dimensions ******'] + list(df_filter2.columns)),
-                            default=[#'AAP Code',
-                                     'Base Pay Range Segment',
-                                     # 'CF_ Job Family as of Hire date',
-                                     'CF_Evaluate Superior Organization - Level 03 Name',
-                                     'CF_Evaluate Superior Organization - Level 04 Name',
-                            # 'CF_Function on hire date',
-                            # 'CF_LVD Country at Hire Date',
-                            # 'CF_LVD_Comp Grade as of Hire Date',
-                            # 'CF_T/F Is Top Talent (New)',
-                            # 'CF_TF_Is Top Performer(Based on Last 3 Overtime Ratings)',
-                            # 'CF_job profile on hire date',
-                            # 'CF_job family group on hire date',
-                            # 'CF_location address city on hire date',
-                            # 'EEO Group', 'Employee Type',
-                            'Function', 'Function Type', 'Gender', 'Generation',
-                            'Geographic Location', #'Grade Grouping',
-                            # 'Is Manager',
-                            'Job Family', 'Job Family Group',
-                            # 'Job Profile',
-                            'Length of Service - Worker - By Tenure Category',
-                            # 'Location Address - Country', 'Org level 2 on hire date',
-                            # 'Org level 3 on hire date', 'Org level 4 on hire date',
-                            # 'Performance - Potential',
-                            'Personal Compensation Grade',
-                            # 'Potential - Completed Rating', 'Supervisory Organization',
-                            'Age_Bucketed', 'Time in position-Bucket'#, 'PPM_Last2yrsAvg'
-                            ] )
+                            default=[  # 'AAP Code',
+                                'Base Pay Range Segment',
+                                # 'CF_ Job Family as of Hire date',
+                                'CF_Evaluate Superior Organization - Level 03 Name',
+                                'CF_Evaluate Superior Organization - Level 04 Name',
+                                # 'CF_Function on hire date',
+                                # 'CF_LVD Country at Hire Date',
+                                # 'CF_LVD_Comp Grade as of Hire Date',
+                                # 'CF_T/F Is Top Talent (New)',
+                                # 'CF_TF_Is Top Performer(Based on Last 3 Overtime Ratings)',
+                                # 'CF_job profile on hire date',
+                                # 'CF_job family group on hire date',
+                                # 'CF_location address city on hire date',
+                                # 'EEO Group', 'Employee Type',
+                                'Function', 'Function Type', 'Gender', 'Generation',
+                                'Geographic Location',  # 'Grade Grouping',
+                                # 'Is Manager',
+                                'Job Family', 'Job Family Group',
+                                # 'Job Profile',
+                                'Length of Service - Worker - By Tenure Category',
+                                # 'Location Address - Country', 'Org level 2 on hire date',
+                                # 'Org level 3 on hire date', 'Org level 4 on hire date',
+                                # 'Performance - Potential',
+                                'Personal Compensation Grade',
+                                # 'Potential - Completed Rating', 'Supervisory Organization',
+                                'Age_Bucketed', 'Time in position-Bucket'  # , 'PPM_Last2yrsAvg'
+                            ])
                         # col1.write(select_dimension_summary)
 
                         top_k = int(
@@ -639,7 +696,8 @@ def analyze_data(data):
 
                                 st.write(df_combined)
                                 st.markdown(
-                                    str('<button type="button">' + get_table_download_link(df_combined, file_name=colx) + '</button>'),
+                                    str('<button type="button">' + get_table_download_link(df_combined,
+                                                                                           file_name=colx) + '</button>'),
                                     unsafe_allow_html=True)
 
                     elif select_analysis == 'Drilldown':
@@ -663,32 +721,32 @@ def analyze_data(data):
                             # st.write(results_df2)
 
                             results_df2['Overall_Headcount'] = results_df[['Overall_EmpExit0']].sum()[0]
-                            results_df2['Overall_Churned']   = results_df[['Overall_EmpExit1']].sum()[0]
+                            results_df2['Overall_Churned'] = results_df[['Overall_EmpExit1']].sum()[0]
 
                             results_df2['%ofOverall_Headcount'] = np.divide(results_df2['FilteredOverall_EmpExit0'],
-                                                                           results_df2['Overall_Headcount']) * 100
+                                                                            results_df2['Overall_Headcount']) * 100
                             results_df2['%ofOverall_Churned'] = np.divide(results_df2['FilteredOverall_EmpExit1'],
-                                                                         results_df2['Overall_Churned']) * 100
+                                                                          results_df2['Overall_Churned']) * 100
 
                             results_df2_display = results_df2.copy()
-                            results_df2_display.rename(columns={'FilteredOverall_EmpExit0' : 'Category_Headcount',
-                                                               'FilteredOverall_EmpExit1'  : 'Category_Churn',
-                                                               'FilteredOverall_ExitRatio%': 'Category_Churn%'},
+                            results_df2_display.rename(columns={'FilteredOverall_EmpExit0': 'Category_Headcount',
+                                                                'FilteredOverall_EmpExit1': 'Category_Churn',
+                                                                'FilteredOverall_ExitRatio%': 'Category_Churn%'},
                                                        inplace=True)
 
-                            cols_show2 = [#'Overall_Headcount',
-                                         'Category_Headcount', '%ofOverall_Headcount',
-                                         #'Overall_Churned'   ,
-                                         'Category_Churn'    , '%ofOverall_Churned',
-                                         'Category_Churn%'
-                                         ]
+                            cols_show2 = [  # 'Overall_Headcount',
+                                'Category_Headcount', '%ofOverall_Headcount',
+                                # 'Overall_Churned'   ,
+                                'Category_Churn', '%ofOverall_Churned',
+                                'Category_Churn%'
+                            ]
                             results_df2_display = results_df2_display[cols_show2].copy()
                             results_df2_display.sort_values(by='Category_Churn', ascending=False, inplace=True)
                             st.write(results_df2_display)
 
                             st.markdown(
                                 str('<button type="button">' + get_table_download_link(results_df2_display,
-                                                                                       file_name=select_dimension2)+ '</button>'),
+                                                                                       file_name=select_dimension2) + '</button>'),
                                 unsafe_allow_html=True)
                             ################################################################################
                             select_dimension_val2 = st.multiselect('Select Dimension2 Value',
@@ -698,7 +756,7 @@ def analyze_data(data):
                                 # st.write(f'{select_dimension} vs {select_target}')
                                 df_filter3 = df_filter2[df_filter2[select_dimension2].isin(select_dimension_val2)]
                                 st.write(
-                                    '########################################################################################')
+                                    '#######################################################################################')
                                 select_dimension3 = st.selectbox('Select Dimension3', df_filter3.columns)
 
                                 if ((select_dimension3 is not None)):
@@ -726,7 +784,7 @@ def analyze_data(data):
                                         df_filter4 = df_filter3[
                                             df_filter3[select_dimension3].isin(select_dimension_val3)]
                                         st.write(
-                                            '########################################################################################')
+                                            '#######################################################################################')
                                         select_dimension4 = st.selectbox('Select Dimension4', df_filter4.columns)
 
                                         if ((select_dimension4 is not None)):
@@ -753,7 +811,7 @@ def analyze_data(data):
                                                 df_filter5 = df_filter4[
                                                     df_filter4[select_dimension4].isin(select_dimension_val4)]
                                                 st.write(
-                                                    '########################################################################################')
+                                                    '#######################################################################################')
                                                 select_dimension5 = st.selectbox('Select Dimension5',
                                                                                  df_filter5.columns)
 
@@ -782,7 +840,7 @@ def analyze_data(data):
                                                         df_filter6 = df_filter5[
                                                             df_filter5[select_dimension5].isin(select_dimension_val5)]
                                                         st.write(
-                                                            '########################################################################################')
+                                                            '#######################################################################################')
                                                         select_dimension6 = st.selectbox('Select Dimension6',
                                                                                          df_filter6.columns)
 
@@ -792,7 +850,8 @@ def analyze_data(data):
                                                             results_df6 = data_grouping2(data_df=df_filter6,
                                                                                          feature_col=select_dimension6,
                                                                                          target_col=select_target)
-                                                            data_visual(data_df=df_filter6, feature_col=select_dimension6,
+                                                            data_visual(data_df=df_filter6,
+                                                                        feature_col=select_dimension6,
                                                                         target_col=select_target)
                                                             st.write(results_df6)
 
@@ -801,8 +860,10 @@ def analyze_data(data):
     else:
         st.markdown('**No Data Available to show!**.')
 
+
 # import SessionState
 import time
+
 
 def main():
     """ Semi Supervised Machine Learning App with Streamlit """
@@ -810,7 +871,7 @@ def main():
     # session = SessionState.get(run_id=0)
 
     st.title("Data Science Webapp")
-    #st.text("By Ashish Gopal")
+    # st.text("By Ashish Gopal")
 
     activities_outer = ["Data Ingestion", "Others", "About"]
     choice_1_outer = st.sidebar.radio("Choose your Step:", activities_outer)
@@ -818,7 +879,7 @@ def main():
     data = pd.DataFrame()
 
     if choice_1_outer == "Data Ingestion":
-        file_types = ["csv","txt"]
+        file_types = ["csv", "txt"]
 
         activities_1 = ["1. Data Import", "2. Data Preprocess", "3. Data Analysis"]
         choice_1 = st.sidebar.selectbox("Select Activities", activities_1)
@@ -936,7 +997,6 @@ def main():
         if choice_1 == "3. Data Analysis":
             analyze_data(load_modified_data())
 
-
     if choice_1_outer == "Others":
         st.write('Coming Soon...')
         st.write('---------------------------------------------------')
@@ -956,5 +1016,7 @@ def main():
         st.markdown("LinkedIn: https://www.linkedin.com/in/ashish-gopal-73824572/")
         st.markdown("GitHub: https://github.com/ashishgopal1414")
         st.write('---------------------------------------------------')
+
+
 if __name__ == '__main__':
-	main()
+    main()
